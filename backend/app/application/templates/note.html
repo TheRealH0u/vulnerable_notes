@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+{% include "navbar.html" %}
+{% block content %}
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10 col-sm-12">
+      <div class="card shadow">
+        <div class="card-body">
+          <h5>Note owner: {{ note_owner_username }}</h5>
+          <form
+            method="POST"
+            action="{{ url_for('web.note_view', note_id=note.id) if note else url_for('web.notes') }}"
+          >
+            {{ form.csrf_token }}
+
+            <!-- Title -->
+            <div class="mb-3">
+              {{ form.title.label(class_='form-label') }}
+              {{ form.title(class_='form-control', value=note.title if note else '') }}
+            </div>
+
+            <!-- Content -->
+            <div class="mb-3">
+              {{ form.content.label(class_='form-label') }}
+              {{ form.content(class_='form-control', rows=5) }}
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex justify-content-start">
+              {% if note %}
+              <button type="button" id="edit-btn" class="btn btn-primary me-2">Edit</button>
+              {% endif %}
+              <button type="submit" id="save-btn" class="btn btn-success me-2">
+                {{ 'Create' if note is none else 'Save' }}
+              </button>
+              <button type="button" id="cancel-btn" class="btn btn-secondary me-2">Cancel</button>
+            </div>
+          </form>
+
+          {% if note %}
+          <form
+            method="POST"
+            action="{{ url_for('web.note_delete', note_id=note.id) }}"
+            onsubmit="return confirm('Are you sure?');"
+          >
+            <div class="d-flex justify-content-start mt-2">
+              <button type="submit" class="btn btn-danger me-2">Delete</button>
+            </div>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const editBtn = document.getElementById("edit-btn");
+  const saveBtn = document.getElementById("save-btn");
+  const cancelBtn = document.getElementById("cancel-btn");
+  const titleInput = document.querySelector("input[name='title']");
+  const contentInput = document.querySelector("textarea[name='content']");
+
+  // JS boolean to indicate if this is a new note
+  const isNew = {{ (note is none) | tojson }};
+
+  let originalTitle = titleInput.value;
+  let originalContent = contentInput.value;
+
+  function setReadOnly(readonly) {
+    titleInput.readOnly = readonly;
+    contentInput.readOnly = readonly;
+  }
+
+  if (!isNew) {
+    // Existing note: read-only by default
+    setReadOnly(true);
+    saveBtn.style.display = "none";
+    cancelBtn.style.display = "none";
+
+    if (editBtn) {
+      editBtn.addEventListener("click", () => {
+        setReadOnly(false);
+        saveBtn.style.display = "inline-block";
+        cancelBtn.style.display = "inline-block";
+        editBtn.style.display = "none";
+      });
+    }
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", () => {
+        titleInput.value = originalTitle;
+        contentInput.value = originalContent;
+        setReadOnly(true);
+        saveBtn.style.display = "none";
+        cancelBtn.style.display = "none";
+        if (editBtn) editBtn.style.display = "inline-block";
+      });
+    }
+
+  } else {
+    // New note: editable immediately
+    setReadOnly(false);
+    saveBtn.style.display = "inline-block";
+    cancelBtn.style.display = "inline-block";
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", () => {
+        window.location.href = "{{ url_for('web.home') }}";
+      });
+    }
+
+    // Hide edit button if present (should not exist for new note)
+    if (editBtn) editBtn.style.display = "none";
+  }
+});
+</script>
+
+{% endblock %}
