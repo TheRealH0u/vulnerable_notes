@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  vuln_notes_db:
+    image: postgres:16-alpine
+    container_name: vuln_notes_db
+    volumes:
+      - db_vuln_notes_data:/var/lib/postgresql/data
+      - ./db/db_seed.sql:/docker-entrypoint-initdb.d/db_seed.sql:ro
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_DB=testdb
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+  backend:
+    build: ./backend
+    restart: always
+    ports:
+      - "8081:8081"
+    depends_on:
+      - vuln_notes_db
+    environment:
+      - POSTGRES_DB=testdb
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST=vuln_notes_db
+      - POSTGRES_PORT=5432
+  frontend:
+    build: ./frontend
+    container_name: vuln_notes_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  # top-level nginx reverse proxy removed; frontend's nginx will serve traffic directly
+
+volumes:
+  db_vuln_notes_data:
