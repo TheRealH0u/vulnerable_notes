@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% include "navbar.html" %}
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8 col-sm-12">
+      <div class="card shadow">
+        <div class="card-body">
+          <h2 class="card-title text-center mb-4">User Settings</h2>
+
+          <form method="POST" action="{{ url_for('web.settings') }}">
+            {{ form.hidden_tag() }}
+
+            <!-- Username (readonly) -->
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                value="{{ user.username }}"
+                readonly
+              />
+            </div>
+
+            <!-- Email (readonly) -->
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                value="{{ user.email }}"
+                readonly
+              />
+            </div>
+
+            <!-- Password (editable) -->
+            <div class="mb-3">
+              {{ form.password.label(class="form-label") }}
+              {{ form.password(class="form-control", placeholder="Enter new password") }}
+              {% for error in form.password.errors %}
+                <div class="text-danger mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="d-grid">
+              {{ form.submit(class="btn btn-primary") }}
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

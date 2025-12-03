@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  vuln_notes_db:
+    image: postgres:16-alpine
+    container_name: vuln_notes_db
+    volumes:
+      - db_vuln_notes_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=testdb
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+  vuln_notes_web:
+    build: ./web
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - vuln_notes_db
+    environment:
+      - POSTGRES_DB=testdb
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST=vuln_notes_db
+      - POSTGRES_PORT=5432
+
+volumes:
+  db_vuln_notes_data:

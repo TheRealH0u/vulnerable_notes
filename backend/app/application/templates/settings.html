@@ -1,0 +1,25 @@
+{% extends "layout.html" %} {% block content %}
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-4 col-md-6 col-sm-8">
+      <div class="card shadow">
+        <div class="card-body">
+          <h3>Settings</h3>
+          <form method="POST" action="{{ url_for('web.settings') }}">
+            {{ form.csrf_token }}
+            <div class="mb-3">
+              {{ form.password.label(class_='form-label') }}
+              {{ form.password(class_='form-control') }}
+            </div>
+            <div class="d-grid">
+              {{ form.submit(class_='btn btn-primary') }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
