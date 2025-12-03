@@ -78,3 +78,33 @@ def getUsername():
         return decoded.get('username')
     except:
         return None
+
+
+def slugify_title(title: str) -> str:
+    """
+    Convert a note title into a URL-friendly slug.
+
+    Examples:
+    - "Hello World!" -> "hello-world"
+    - "  New: Note/Title " -> "new-note-title"
+
+    This function lowercases the string, replaces any sequence of
+    non-alphanumeric characters with a single hyphen, and strips
+    leading/trailing hyphens.
+    """
+    if not isinstance(title, str):
+        raise TypeError('title must be a string')
+
+    # Normalize to ASCII equivalent where possible
+    try:
+        import unicodedata
+        title = unicodedata.normalize('NFKD', title)
+        title = title.encode('ascii', 'ignore').decode('ascii')
+    except Exception:
+        # If anything goes wrong with normalization, fall back to original
+        pass
+
+    # Replace non-alphanumeric sequences with hyphens
+    import re
+    slug = re.sub(r"[^a-zA-Z0-9]+", '-', title.lower()).strip('-')
+    return slug
