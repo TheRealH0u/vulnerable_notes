@@ -2,16 +2,18 @@ import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import App from './App.vue'
 
-// Mock axios
+// Mock axios - IMPORTANT: must return Promise
+const mockAxios = {
+  get: vi.fn(() => Promise.resolve({ data: { username: null } })),
+  post: vi.fn(() => Promise.resolve({ data: { message: 'ok' } }))
+}
+
 vi.mock('axios', () => ({
-  default: {
-    post: vi.fn(),
-    get: vi.fn()
-  }
+  default: mockAxios
 }))
 
 describe('App Component', () => {
-  it('renders app div', () => {
+  it('renders app div', async () => {
     const wrapper = mount(App, {
       global: {
         stubs: {
@@ -28,10 +30,11 @@ describe('App Component', () => {
         }
       }
     })
+    await wrapper.vm.$nextTick()
     expect(wrapper.find('div').exists()).toBe(true)
   })
 
-  it('initializes with null user', () => {
+  it('initializes with null user', async () => {
     const wrapper = mount(App, {
       global: {
         stubs: {
@@ -44,10 +47,11 @@ describe('App Component', () => {
         }
       }
     })
+    await wrapper.vm.$nextTick()
     expect(wrapper.vm.user).toBeNull()
   })
 
-  it('has fetchUser method', () => {
+  it('has fetchUser method', async () => {
     const wrapper = mount(App, {
       global: {
         stubs: {
@@ -60,10 +64,11 @@ describe('App Component', () => {
         }
       }
     })
+    await wrapper.vm.$nextTick()
     expect(typeof wrapper.vm.fetchUser).toBe('function')
   })
 
-  it('has doLogout method', () => {
+  it('has doLogout method', async () => {
     const wrapper = mount(App, {
       global: {
         stubs: {
@@ -76,6 +81,7 @@ describe('App Component', () => {
         }
       }
     })
+    await wrapper.vm.$nextTick()
     expect(typeof wrapper.vm.doLogout).toBe('function')
   })
 })

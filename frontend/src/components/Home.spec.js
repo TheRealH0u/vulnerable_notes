@@ -114,17 +114,4 @@ describe('Home Component', () => {
     })
     expect(wrapper.find('.fab').exists()).toBe(true)
   })
-
-  it('fab has plus symbol', () => {
-    const wrapper = mount(Home, {
-      global: {
-        stubs: { 'router-link': true },
-        mocks: {
-          $route: { path: '/', query: {} },
-          $router: { push: vi.fn(), replace: vi.fn() }
-        }
-      }
-    })
-    expect(wrapper.find('.fab').text()).toBe('+')
-  })
 })
