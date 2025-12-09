@@ -9,6 +9,22 @@ if APP_DIR not in sys.path:
     sys.path.insert(0, APP_DIR)
 
 from application.models import Users, Note, LoginForm, RegistrationForm, NoteForm
+from application import create_app
+
+
+@pytest.fixture
+def app():
+    """Create Flask app for testing"""
+    app = create_app()
+    app.config['TESTING'] = True
+    return app
+
+
+@pytest.fixture
+def app_context(app):
+    """Create app context for tests"""
+    with app.app_context():
+        yield app
 
 
 class TestUsersModel:
@@ -48,12 +64,12 @@ class TestNoteModel:
 class TestLoginForm:
     """Test LoginForm validation"""
 
-    def test_login_form_exists(self):
+    def test_login_form_exists(self, app_context):
         """Test LoginForm can be instantiated"""
         form = LoginForm()
         assert form is not None
 
-    def test_login_form_fields(self):
+    def test_login_form_fields(self, app_context):
         """Test LoginForm has required fields"""
         form = LoginForm()
         assert hasattr(form, 'username')
@@ -64,12 +80,12 @@ class TestLoginForm:
 class TestRegistrationForm:
     """Test RegistrationForm validation"""
 
-    def test_registration_form_exists(self):
+    def test_registration_form_exists(self, app_context):
         """Test RegistrationForm can be instantiated"""
         form = RegistrationForm()
         assert form is not None
 
-    def test_registration_form_fields(self):
+    def test_registration_form_fields(self, app_context):
         """Test RegistrationForm has required fields"""
         form = RegistrationForm()
         assert hasattr(form, 'username')
@@ -80,6 +96,19 @@ class TestRegistrationForm:
 
 
 class TestNoteForm:
+    """Test NoteForm validation"""
+
+    def test_note_form_exists(self, app_context):
+        """Test NoteForm can be instantiated"""
+        form = NoteForm()
+        assert form is not None
+
+    def test_note_form_fields(self, app_context):
+        """Test NoteForm has required fields"""
+        form = NoteForm()
+        assert hasattr(form, 'title')
+        assert hasattr(form, 'content')
+        assert hasattr(form, 'submit')
     """Test NoteForm validation"""
 
     def test_note_form_exists(self):

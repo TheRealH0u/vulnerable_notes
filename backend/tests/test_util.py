@@ -15,6 +15,22 @@ from application.util import (
     isAdminBool, getUsername, isAdmin, authenticated
 )
 from application.models import Users, Note, db, LoginForm, RegistrationForm, NoteForm
+from application import create_app
+
+
+@pytest.fixture
+def app():
+    """Create Flask app for testing"""
+    app = create_app()
+    app.config['TESTING'] = True
+    return app
+
+
+@pytest.fixture
+def app_context(app):
+    """Create app context for tests"""
+    with app.app_context():
+        yield app
 
 
 # ===== SLUGIFY TESTS =====
@@ -114,7 +130,7 @@ def test_verify_jwt_invalid():
 
 
 # ===== RESPONSE TESTS =====
-def test_response_function():
+def test_response_function(app_context):
     """Test response helper function"""
     resp = response('test message')
     assert resp is not None
