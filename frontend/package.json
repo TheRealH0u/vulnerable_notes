@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview --port 5173"
+    "preview": "vite preview --port 5173",
+    "test": "vitest --run --coverage",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "vue": "^3.3.4",
@@ -14,6 +16,11 @@
   },
   "devDependencies": {
     "vite": "^5.0.0",
-    "@vitejs/plugin-vue": "^4.0.0"
+    "@vitejs/plugin-vue": "^4.0.0",
+    "vitest": "^1.0.0",
+    "@vitest/ui": "^1.0.0",
+    "@vue/test-utils": "^2.4.1",
+    "@vitest/coverage-v8": "^1.0.0",
+    "happy-dom": "^12.10.3"
   }
 }

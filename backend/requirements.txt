@@ -30,3 +30,5 @@ Werkzeug==2.3.6
 WTForms==3.0.1
 psycopg2-binary
 pytest==7.4.2
+pytest-cov==4.1.0
+coverage==7.3.0
