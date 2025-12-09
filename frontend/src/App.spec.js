@@ -2,14 +2,12 @@ import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import App from './App.vue'
 
-// Mock axios - IMPORTANT: must return Promise
-const mockAxios = {
-  get: vi.fn(() => Promise.resolve({ data: { username: null } })),
-  post: vi.fn(() => Promise.resolve({ data: { message: 'ok' } }))
-}
-
+// Mock axios - must be before vi.mock
 vi.mock('axios', () => ({
-  default: mockAxios
+  default: {
+    get: vi.fn(() => Promise.resolve({ data: { username: null } })),
+    post: vi.fn(() => Promise.resolve({ data: { message: 'ok' } }))
+  }
 }))
 
 describe('App Component', () => {
