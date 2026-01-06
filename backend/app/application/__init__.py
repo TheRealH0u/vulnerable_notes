@@ -22,6 +22,14 @@ def create_app():
     except Exception:
         pass
 
+    # For SQLite, ensure tables exist at startup
+    try:
+        if str(app.config.get('SQLALCHEMY_DATABASE_URI', '')).startswith('sqlite'):
+            with app.app_context():
+                db.create_all()
+    except Exception:
+        pass
+
     # JSON error handlers
     @app.errorhandler(404)
     def not_found(error):
