@@ -2,11 +2,21 @@ import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import Home from './Home.vue'
 
-vi.mock('axios', () => ({
-  default: {
-    get: vi.fn(() => Promise.resolve({ data: { notes: [] } }))
+vi.mock('axios', () => {
+  const mockAxios = {
+    get: vi.fn(() => Promise.resolve({ data: { notes: [] } })),
+    interceptors: {
+      request: { use: vi.fn((fn) => fn) },
+      response: { use: vi.fn((fn) => fn) }
+    }
   }
-}))
+  return {
+    default: {
+      ...mockAxios,
+      create: vi.fn(() => mockAxios)
+    }
+  }
+})
 
 describe('Home Component', () => {
   it('renders notes container', () => {
