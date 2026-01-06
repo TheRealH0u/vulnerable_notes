@@ -122,6 +122,7 @@ describe('Home Component', () => {
         }
       }
     })
-    expect(wrapper.find('.fab').exists()).toBe(true)
+    // Updated to match id="add_note" instead of class="fab"
+    expect(wrapper.find('#add_note').exists()).toBe(true)
   })
 })
