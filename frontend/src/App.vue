@@ -45,26 +45,48 @@ import apiClient from '@/api'
 export default {
   data(){ return { user: null } },
   created(){
-    // Try to fetch current user
-    this.fetchUser()
+    // Only fetch user if we're on a protected route
+    if (this.$route.meta.requiresAuth) {
+      this.fetchUser()
+    }
   },
   methods: {
     doLogout(){
       try { sessionStorage.removeItem('notes_cache') } catch(e){}
       // Call API logout which clears cookie
       apiClient.post('/api/logout', {})
-        .then(()=> { window.location = '/login' })
-        .catch(()=> { window.location = '/login' })
+        .then(()=> { 
+          this.user = null
+          this.$router.push('/login')
+        })
+        .catch(()=> { 
+          this.user = null
+          this.$router.push('/login')
+        })
     },
     fetchUser(){
       apiClient.get('/api/me')
-        .then(res => { if (res.data && res.data.username) this.user = res.data.username })
-        .catch(()=> { this.user = null })
+        .then(res => { 
+          if (res.data && res.data.username) {
+            this.user = res.data.username
+          }
+        })
+        .catch(()=> { 
+          this.user = null
+          // If fetching user fails and we're on protected route, router will redirect
+        })
     }
   },
   watch: {
     '$route' (to, from) {
-      if (!this.user) this.fetchUser()
+      // Fetch user when navigating to protected routes
+      if (to.meta.requiresAuth && !this.user) {
+        this.fetchUser()
+      }
+      // Clear user when going to login/register
+      if (to.path === '/login' || to.path === '/register') {
+        this.user = null
+      }
     }
   }
 }
