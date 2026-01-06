@@ -42,15 +42,26 @@ def create_app():
         return jsonify({'error': 'server_error', 'message': message}), error_code
 
     # Enable Flask-CORS for API endpoints
-    # Allow both localhost and Render deployment URLs
-    allowed_origins = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:80",
-        "http://localhost",
-        "https://vulnerable-notes-frontend.onrender.com",
-        os.getenv('FRONTEND_URL', 'http://localhost')
-    ]
+    # Allow both localhost and deployment URLs; prefer env override in production.
+    env_origins = os.getenv('ALLOWED_ORIGINS')  # Comma-separated list for production
+    if env_origins:
+        allowed_origins = [o.strip() for o in env_origins.split(',') if o.strip()]
+    else:
+        allowed_origins = [
+            # Local dev (Vite) and common localhost variants
+            "http://localhost",
+            "http://localhost:80",
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1",
+            "http://127.0.0.1:80",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173",
+            # Render (or other) frontend default/sample
+            "https://vulnerable-notes-frontend.onrender.com",
+            # Custom single override via env (legacy)
+            os.getenv('FRONTEND_URL', 'http://localhost')
+        ]
     
     CORS(app, 
          resources={r"/api/*": {"origins": allowed_origins}},
