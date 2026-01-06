@@ -81,7 +81,14 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
+      
+      - name: Check and generate package-lock.json if missing
+        working-directory: ./frontend
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "package-lock.json not found, generating from package.json..."
+            npm install --package-lock-only
+          fi
       
       - name: Install frontend dependencies
         working-directory: ./frontend
@@ -168,7 +175,14 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
+      
+      - name: Check and generate package-lock.json if missing
+        working-directory: ./frontend
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "package-lock.json not found, generating from package.json..."
+            npm install --package-lock-only
+          fi
       
       - name: Install frontend dependencies
         working-directory: ./frontend
