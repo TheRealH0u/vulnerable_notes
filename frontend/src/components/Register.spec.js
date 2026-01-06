@@ -2,11 +2,21 @@ import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import Register from './Register.vue'
 
-vi.mock('axios', () => ({
-  default: {
-    post: vi.fn(() => Promise.resolve({ data: { message: 'created' } }))
+vi.mock('axios', () => {
+  const mockAxios = {
+    post: vi.fn(() => Promise.resolve({ data: { message: 'created' } })),
+    interceptors: {
+      request: { use: vi.fn((fn) => fn) },
+      response: { use: vi.fn((fn) => fn) }
+    }
   }
-}))
+  return {
+    default: {
+      ...mockAxios,
+      create: vi.fn(() => mockAxios)
+    }
+  }
+})
 
 describe('Register Component', () => {
   it('renders register form', () => {

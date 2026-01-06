@@ -34,15 +34,15 @@
 </template>
 
 <script>
-import axios from 'axios'
+import apiClient from '@/api'
 export default {
   data(){ return { username:'', password:'' } },
   methods: {
     doLogin(){
-      axios.post('/api/login', { username: this.username, password: this.password }, { withCredentials: true })
+      apiClient.post('/api/login', { username: this.username, password: this.password })
         .then(()=> {
           // After login, fetch notes and cache them so Home can render immediately
-          axios.get('/api/notes', { withCredentials: true })
+          apiClient.get('/api/notes')
             .then(res => {
               const notes = (res.data && res.data.notes) ? res.data.notes : []
               try { sessionStorage.setItem('notes_cache', JSON.stringify(notes)) } catch(e){}
