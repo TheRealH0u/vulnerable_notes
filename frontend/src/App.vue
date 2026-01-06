@@ -46,7 +46,7 @@ export default {
   data(){ return { user: null } },
   created(){
     // Only fetch user if we're on a protected route
-    if (this.$route.meta.requiresAuth) {
+    if (this.$route && this.$route.meta && this.$route.meta.requiresAuth) {
       this.fetchUser()
     }
   },
@@ -80,11 +80,11 @@ export default {
   watch: {
     '$route' (to, from) {
       // Fetch user when navigating to protected routes
-      if (to.meta.requiresAuth && !this.user) {
+      if (to && to.meta && to.meta.requiresAuth && !this.user) {
         this.fetchUser()
       }
       // Clear user when going to login/register
-      if (to.path === '/login' || to.path === '/register') {
+      if (to && (to.path === '/login' || to.path === '/register')) {
         this.user = null
       }
     }
