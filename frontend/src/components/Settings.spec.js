@@ -4,12 +4,22 @@ import Settings from './Settings.vue'
 import axios from 'axios'
 
 // Mock axios
-vi.mock('axios', () => ({
-  default: {
+vi.mock('axios', () => {
+  const mockAxios = {
     get: vi.fn(() => Promise.resolve({ data: { username: 'testuser', email: 'test@example.com' } })),
-    post: vi.fn(() => Promise.resolve({ data: { message: 'updated' } }))
+    post: vi.fn(() => Promise.resolve({ data: { message: 'updated' } })),
+    interceptors: {
+      request: { use: vi.fn((fn) => fn) },
+      response: { use: vi.fn((fn) => fn) }
+    }
   }
-}))
+  return {
+    default: {
+      ...mockAxios,
+      create: vi.fn(() => mockAxios)
+    }
+  }
+})
 
 describe('Settings Component', () => {
   it('renders settings form', () => {

@@ -3,12 +3,22 @@ import { mount } from '@vue/test-utils'
 import Login from './Login.vue'
 
 // Mock axios
-vi.mock('axios', () => ({
-  default: {
+vi.mock('axios', () => {
+  const mockAxios = {
     post: vi.fn(() => Promise.resolve({ data: { message: 'ok' } })),
-    get: vi.fn(() => Promise.resolve({ data: { notes: [] } }))
+    get: vi.fn(() => Promise.resolve({ data: { notes: [] } })),
+    interceptors: {
+      request: { use: vi.fn((fn) => fn) },
+      response: { use: vi.fn((fn) => fn) }
+    }
   }
-}))
+  return {
+    default: {
+      ...mockAxios,
+      create: vi.fn(() => mockAxios)
+    }
+  }
+})
 
 describe('Login Component', () => {
   it('renders login form', () => {

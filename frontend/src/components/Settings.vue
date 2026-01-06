@@ -33,11 +33,11 @@
 </template>
 
 <script>
-import axios from 'axios'
+import apiClient from '@/api'
 export default {
   data(){ return { password:'', username:'', email:'' } },
   created(){
-    axios.get('/api/user', { withCredentials: true })
+    apiClient.get('/api/user')
       .then(res => {
         if (res.data){ this.username = res.data.username; this.email = res.data.email }
       })
@@ -46,7 +46,7 @@ export default {
   methods:{
     update(){
       if (!this.password) return alert('Please enter a new password')
-      axios.post('/api/settings', { password: this.password }, { withCredentials: true })
+      apiClient.post('/api/settings', { password: this.password })
         .then(()=> alert('Password updated'))
         .catch(()=> alert('Update failed'))
     }
