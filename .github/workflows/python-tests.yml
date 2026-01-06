@@ -80,19 +80,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-      
-      - name: Check and generate package-lock.json if missing
-        working-directory: ./frontend
-        run: |
-          if [ ! -f package-lock.json ]; then
-            echo "package-lock.json not found, generating from package.json..."
-            npm install --package-lock-only
-          fi
       
       - name: Install frontend dependencies
         working-directory: ./frontend
-        run: npm ci || npm install
+        run: npm install
       
       - name: Run frontend tests with coverage
         working-directory: ./frontend
@@ -174,19 +165,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-      
-      - name: Check and generate package-lock.json if missing
-        working-directory: ./frontend
-        run: |
-          if [ ! -f package-lock.json ]; then
-            echo "package-lock.json not found, generating from package.json..."
-            npm install --package-lock-only
-          fi
       
       - name: Install frontend dependencies
         working-directory: ./frontend
-        run: npm ci || npm install
+        run: npm install
       
       - name: Build frontend
         working-directory: ./frontend
