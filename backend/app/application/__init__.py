@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from application.models import db
 from flask_cors import CORS
+import os
 
 def create_app():
     app = Flask(
@@ -41,6 +42,18 @@ def create_app():
         return jsonify({'error': 'server_error', 'message': message}), error_code
 
     # Enable Flask-CORS for API endpoints
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    # Allow both localhost and Render deployment URLs
+    allowed_origins = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:80",
+        "http://localhost",
+        "https://vulnerable-notes-frontend.onrender.com",
+        os.getenv('FRONTEND_URL', 'http://localhost')
+    ]
+    
+    CORS(app, 
+         resources={r"/api/*": {"origins": allowed_origins}},
+         supports_credentials=True)
 
     return app

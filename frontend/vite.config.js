@@ -8,12 +8,12 @@ export default defineConfig({
     proxy: {
       // Proxy API calls to the backend Flask server during development
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:8081',
         changeOrigin: true,
         secure: false
       },
       '/logout': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:8081',
         changeOrigin: true,
         secure: false
       }
