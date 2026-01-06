@@ -24,12 +24,12 @@
 </template>
 
 <script>
-import axios from 'axios'
+import apiClient from '@/api'
 export default {
   data(){ return { username:'', email:'', password:'', verify:'' } },
   methods:{
     doRegister(){
-      axios.post('/api/register', { username:this.username, email:this.email, password:this.password, verify:this.verify }, { withCredentials: true })
+      apiClient.post('/api/register', { username:this.username, email:this.email, password:this.password, verify:this.verify })
         .then(()=> { alert('Registered'); this.$router.push('/login') })
         .catch(err => { alert('Register failed') })
     }

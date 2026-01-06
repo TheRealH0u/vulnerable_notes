@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import apiClient from '@/api'
 
 export default {
   data(){
@@ -50,7 +50,7 @@ export default {
     } catch(e){ /* ignore parse errors */ }
 
     // Then fetch fresh notes from backend and update
-    axios.get('/api/notes', { withCredentials: true })
+    apiClient.get('/api/notes')
       .then(res => { this.notes = res.data.notes || []; try { sessionStorage.setItem('notes_cache', JSON.stringify(this.notes)) } catch(e){} })
       .catch(err => { console.error('Failed loading notes', err) })
 

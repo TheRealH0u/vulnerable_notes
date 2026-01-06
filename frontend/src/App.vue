@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import apiClient from '@/api'
 
 export default {
   data(){ return { user: null } },
@@ -40,13 +40,13 @@ export default {
   methods: {
     doLogout(){
       try { sessionStorage.removeItem('notes_cache') } catch(e){}
-      // Call API logout which clears cookie via proxy
-      axios.post('/api/logout', {}, { withCredentials: true })
+      // Call API logout which clears cookie
+      apiClient.post('/api/logout', {})
         .then(()=> { window.location = '/login' })
         .catch(()=> { window.location = '/login' })
     },
     fetchUser(){
-      axios.get('/api/me', { withCredentials: true })
+      apiClient.get('/api/me')
         .then(res => { if (res.data && res.data.username) this.user = res.data.username })
         .catch(()=> { this.user = null })
     }
