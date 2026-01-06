@@ -1,0 +1,91 @@
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+ENV/
+env/
+.venv
+
+# Frontend
+node_modules/
+dist/
+coverage/
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+.env.local
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+coverage-report.json
+coverage-html/
+
+# Docker
+.docker
+Dockerfile.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+postgres_data/
+db_vuln_notes_data/
+
+# Misc
+.cache/
+.tmp/
+tmp/
+temp/
+*.bak
+
+# CI/CD Artifacts
+coverage/
+dist/
+build/

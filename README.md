@@ -1,41 +1,141 @@
-# VulnerableNotes - Frontend/Backend Split
+# VulnerableNotes - Frontend/Backend Split with CI/CD Pipeline
 
-This repository was split to separate the frontend (Vue 3 + Vite) and backend (Flask).
+A Vue 3 + Vite frontend paired with a Flask backend, featuring a complete CI/CD pipeline with GitHub Actions, Docker Hub integration, and automated deployment to Render.
 
-What I changed:
-- Added a `frontend/` directory with a Vite + Vue 3 app scaffold.
-- Added an `api` blueprint in the Flask app exposing JSON endpoints under `/api/*` (login, notes CRUD).
-- Enabled simple CORS on the Flask app for development.
- - Updated `docker-compose.yml` to build the frontend with a `frontend_builder` and serve it with an `nginx` service.
+## ✨ What's Included
 
-Quick start (development):
+- **Frontend**: Vue 3 + Vite + Vitest for testing
+- **Backend**: Flask + SQLAlchemy + PostgreSQL
+- **CI/CD Pipeline**: GitHub Actions with:
+  - Automated testing (backend + frontend)
+  - Dependency caching (Python + Node.js)
+  - Docker image build and push to Docker Hub
+  - Automated deployment to Render
+  - Health checks and monitoring
 
-Run everything via docker-compose (recommended):
+## 🚀 Quick Start (Development)
 
-1) From repository root run (PowerShell):
+### Using Docker Compose (Recommended)
 
-   docker-compose up --build
+Run everything locally:
 
-This will perform the following:
-- `frontend` will be built from `frontend/Dockerfile` and run a static file server on port 5000.
-- `nginx` will serve the frontend on port 80 and proxy `/api` to the backend API.
-- `vuln_notes_web` is the Flask/Gunicorn API service listening internally on port 8081.
+```bash
+docker-compose up --build
+```
 
-Note: the compose file no longer creates a database container. You must provide database connection details using environment variables or a separate DB service. The backend env vars are still present in `docker-compose.yml` for convenience; point `POSTGRES_HOST`/`POSTGRES_USER`/`POSTGRES_PASSWORD` to your DB.
+This will:
+- Build and run the **frontend** (Vue 3 + Nginx)
+- Build and run the **backend** (Flask + Gunicorn)
+- Start **PostgreSQL database** container
+- Configure networking and environment variables
 
-Routing behavior (after compose up):
-- http://localhost/ -> served by nginx (the Vue SPA)
-- http://localhost/api/... -> proxied by nginx to the Flask API (vuln_notes_web) on internal port 8081
+Access the application:
+- **Frontend**: http://localhost/ (Nginx)
+- **API**: http://localhost/api/* (proxied through Nginx)
+- **Backend**: http://localhost:8081/ (direct)
 
-If you want to run frontend in dev mode instead of building in docker:
+### Frontend Development Mode
 
-  cd frontend
-  npm install
-  npm run dev
+Run frontend separately in dev mode:
 
-The dev server runs at http://localhost:5173 (remember the API is routed via nginx in the compose setup above; if you run the dev server separately, frontend will make API requests directly to `/api` which requires Flask CORS to be enabled; this repo enables CORS for development.)
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-Notes / Next steps:
-- The Vue app currently includes a minimal `Home` view that calls `GET /api/notes`.
-- You should migrate the other templates (`login`, `register`, `note`, `settings`) into Vue components/pages and wire them to the API endpoints in `application/blueprints/api.py`.
-- For production, build the frontend (`npm run build`) and serve the static `dist/` via nginx or as static files from the Flask app.
+The dev server runs at http://localhost:5173. Make API requests to http://localhost:8081 (CORS is enabled for development).
+
+## 📊 CI/CD Pipeline
+
+This project uses **GitHub Actions** for automated testing, building, and deployment.
+
+### Pipeline Stages
+
+1. **Testing** → Backend (pytest) + Frontend (vitest)
+2. **Build** → Backend (Python package) + Frontend (Vite bundle)
+3. **Caching** → npm modules + pip dependencies
+4. **Docker Build** → Build images for frontend and backend
+5. **Docker Push** → Push images to Docker Hub
+6. **Deploy** → Automated deployment to Render
+
+### Setup Instructions
+
+**[👉 Complete CI/CD Setup Guide](CI_CD_SETUP.md)**
+
+Required GitHub Secrets:
+- `DOCKER_USERNAME` - Docker Hub username
+- `DOCKER_PASSWORD` - Docker Hub token
+- `RENDER_API_KEY` - Render API key
+- `RENDER_BACKEND_SERVICE_ID` - Render backend service ID
+- `RENDER_FRONTEND_SERVICE_ID` - Render frontend service ID
+
+### Viewing Pipeline Status
+
+1. **GitHub**: Actions tab → Workflow runs
+2. **Docker Hub**: Images tab → Pushed images
+3. **Render**: Dashboard → Service logs and status
+
+## 🏗️ Architecture
+
+```
+Frontend (Vue 3 + Vite)
+    ↓
+Nginx (reverse proxy)
+    ↓
+Backend (Flask API)
+    ↓
+PostgreSQL Database
+```
+
+## 🧪 Testing
+
+### Backend Tests
+
+```bash
+cd backend
+pip install -r requirements.txt
+pytest tests/ --cov=app/application
+```
+
+### Frontend Tests
+
+```bash
+cd frontend
+npm install
+npm test
+```
+
+## 📦 Build Artifacts
+
+After pipeline execution, artifacts are available in GitHub Actions:
+- **Backend Coverage** - HTML coverage report
+- **Frontend Coverage** - Vitest coverage report
+- **Frontend Build** - dist/ folder (7-day retention)
+- **Backend Build** - Python package (7-day retention)
+
+## 🌐 Deployment
+
+The application is deployed to **Render.com**:
+- **Backend API**: Runs Flask application with Gunicorn
+- **Frontend**: Serves Vue SPA via Nginx
+- **Database**: PostgreSQL instance
+
+Deployments are triggered automatically on pushes to `production` branch.
+
+### Environment Variables
+
+Configure these on Render for database connectivity:
+- `POSTGRES_DB` - Database name
+- `POSTGRES_USER` - Database user
+- `POSTGRES_PASSWORD` - Database password
+- `POSTGRES_HOST` - Database host
+- `POSTGRES_PORT` - Database port (default: 5432)
+
+## 📝 Next Steps
+
+- Migrate Flask templates to Vue components
+- Wire frontend components to `/api/*` endpoints
+- Configure environment variables for your deployment
+- Set up GitHub Secrets for CI/CD pipeline
+- Monitor application health in Render dashboard
