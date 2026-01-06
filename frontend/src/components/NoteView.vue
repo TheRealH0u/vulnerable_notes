@@ -28,13 +28,13 @@
 </template>
 
 <script>
-import axios from 'axios'
+import apiClient from '@/api'
 export default {
   data(){ return { title:'', content:'', isNew:true } },
   created(){
     const id = this.$route.params.id
     if (id){
-      axios.get('/api/notes', { withCredentials: true })
+      apiClient.get('/api/notes')
         .then(res => {
           const n = res.data.notes.find(x => x.id == id)
           if (n){
@@ -49,10 +49,10 @@ export default {
   methods: {
     save(){
       if (this.isNew){
-        axios.post('/api/notes', { title:this.title, content:this.content }, { withCredentials: true })
+        apiClient.post('/api/notes', { title:this.title, content:this.content })
           .then(()=> this.$router.push('/'))
       } else {
-        axios.put(`/api/notes/${this.$route.params.id}`, { title:this.title, content:this.content }, { withCredentials: true })
+        apiClient.put(`/api/notes/${this.$route.params.id}`, { title:this.title, content:this.content })
           .then(()=> this.$router.push('/'))
       }
     },
@@ -61,7 +61,7 @@ export default {
     },
     del(){
       if (!confirm('Delete this note?')) return
-      axios.delete(`/api/notes/${this.$route.params.id}`, { withCredentials: true })
+      apiClient.delete(`/api/notes/${this.$route.params.id}`)
         .then(()=> this.$router.push('/'))
     }
   }
