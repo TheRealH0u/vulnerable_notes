@@ -80,12 +80,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
       
       - name: Install frontend dependencies
         working-directory: ./frontend
-        run: npm ci || npm install
+        run: npm install
       
       - name: Run frontend tests with coverage
         working-directory: ./frontend
@@ -167,12 +165,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
       
       - name: Install frontend dependencies
         working-directory: ./frontend
-        run: npm ci || npm install
+        run: npm install
       
       - name: Build frontend
         working-directory: ./frontend
