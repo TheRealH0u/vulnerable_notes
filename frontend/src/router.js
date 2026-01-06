@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import axios from 'axios'
+import apiClient from './api'
 import Home from './components/Home.vue'
 import Login from './components/Login.vue'
 import Register from './components/Register.vue'
@@ -21,7 +21,7 @@ router.beforeEach(async (to, from, next) => {
   // If the route requires authentication, verify via API
   if (to.meta && to.meta.requiresAuth) {
     try {
-      await axios.get('/api/me', { withCredentials: true })
+      await apiClient.get('/api/me')
       return next()
     } catch (e) {
       return next('/login')
@@ -31,7 +31,7 @@ router.beforeEach(async (to, from, next) => {
   // Prevent logged-in users from visiting login/register
   if (to.path === '/login' || to.path === '/register') {
     try {
-      await axios.get('/api/me', { withCredentials: true })
+      await apiClient.get('/api/me')
       return next('/')
     } catch (e) {
       return next()
