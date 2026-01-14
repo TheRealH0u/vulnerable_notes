@@ -1,0 +1,230 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - production
+  workflow_dispatch:
+
+env:
+  REGISTRY: docker.io
+  BACKEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-backend
+  FRONTEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-frontend
+
+jobs:
+  # ===== SONARCLOUD QUALITY GATE CHECK =====
+  quality-gate-check:
+    name: Verify Quality Gate
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check SonarCloud Quality Gate
+        run: |
+          echo "🔍 Checking SonarCloud Quality Gate status..."
+          
+          # Get the latest quality gate status from SonarCloud API
+          RESPONSE=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
+            "https://sonarcloud.io/api/qualitygates/project_status?projectKey=TheRealH0u_vulnerable_notes")
+          
+          STATUS=$(echo $RESPONSE | jq -r '.projectStatus.status')
+          
+          echo "Quality Gate Status: $STATUS"
+          
+          if [ "$STATUS" == "OK" ] || [ "$STATUS" == "NONE" ]; then
+            echo "✅ Quality Gate PASSED - proceeding with deployment"
+            echo "### ✅ Quality Gate Check Passed" >> $GITHUB_STEP_SUMMARY
+            echo "Code quality meets production standards." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          else
+            echo "❌ Quality Gate FAILED - blocking deployment"
+            echo "### ❌ Quality Gate Check Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Code does not meet quality standards. Fix issues before deploying." >> $GITHUB_STEP_SUMMARY
+            echo "🔍 View details: https://sonarcloud.io/dashboard?id=TheRealH0u_vulnerable_notes" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+      
+      - name: Install jq (if needed)
+        if: failure()
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+  # ===== BACKEND BUILD =====
+  backend-build:
+    name: Backend Build
+    runs-on: ubuntu-latest
+    needs: quality-gate-check
+    if: success()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+      
+      - name: Create build directory
+        run: mkdir -p backend/build
+      
+      - name: Copy application files
+        run: |
+          cp -r backend/app backend/build/
+          cp backend/requirements.txt backend/build/
+          cp backend/Dockerfile backend/build/
+          echo "Build completed: $(date)" > backend/build/BUILD_INFO.txt
+      
+      - name: List build artifacts
+        run: |
+          echo "=== Backend Build Artifacts ==="
+          find backend/build -type f | head -20
+          echo "Total size: $(du -sh backend/build | cut -f1)"
+      
+      - name: Upload backend build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build-prod
+          path: backend/build/
+          retention-days: 30
+          compression-level: 6
+
+  # ===== FRONTEND BUILD =====
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-22.04
+    needs: quality-gate-check
+    if: success()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm install
+      
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+      
+      - name: Create build manifest
+        working-directory: ./frontend/dist
+        run: |
+          echo "Frontend Build Manifest - PRODUCTION" > BUILD_MANIFEST.txt
+          echo "====================================" >> BUILD_MANIFEST.txt
+          echo "Build Date: $(date)" >> BUILD_MANIFEST.txt
+          echo "Git Commit: ${{ github.sha }}" >> BUILD_MANIFEST.txt
+          echo "Git Branch: ${{ github.ref_name }}" >> BUILD_MANIFEST.txt
+          echo "" >> BUILD_MANIFEST.txt
+          echo "Files:" >> BUILD_MANIFEST.txt
+          find . -type f | wc -l | xargs -I {} echo "Total files: {}" >> BUILD_MANIFEST.txt
+          du -sh . | cut -f1 | xargs -I {} echo "Total size: {}" >> BUILD_MANIFEST.txt
+      
+      - name: List build artifacts
+        run: |
+          echo "=== Frontend Build Artifacts (dist/) ==="
+          ls -lah frontend/dist/ | head -15
+          echo "Total size: $(du -sh frontend/dist | cut -f1)"
+          echo "Total files: $(find frontend/dist -type f | wc -l)"
+      
+      - name: Upload frontend build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build-prod
+          path: frontend/dist/
+          retention-days: 30
+          compression-level: 6
+
+  # ===== PRODUCTION ENVIRONMENT DEPLOYMENT =====
+  deploy-production:
+    name: Deploy to Production Environment
+    runs-on: ubuntu-latest
+    needs: [backend-build, frontend-build]
+    if: success()
+    environment:
+      name: Production
+      url: https://hub.docker.com/r/${{ secrets.DOCKER_USERNAME }}/vulnerable-notes
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Build and push Backend image (prod)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-backend:prod
+            ${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-backend:prod-${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build and push Frontend image (prod)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-frontend:prod
+            ${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-frontend:prod-${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Deploy to Render (if configured)
+        if: ${{ secrets.RENDER_BACKEND_SERVICE_ID != '' && secrets.RENDER_FRONTEND_SERVICE_ID != '' }}
+        run: |
+          echo "Deploying to Render..."
+          curl -X POST "https://api.render.com/deploy/srv-${{ secrets.RENDER_BACKEND_SERVICE_ID }}?key=${{ secrets.RENDER_BACKEND_API_KEY }}" || echo "Backend deploy trigger sent"
+          curl -X POST "https://api.render.com/deploy/srv-${{ secrets.RENDER_FRONTEND_SERVICE_ID }}?key=${{ secrets.RENDER_FRONTEND_API_KEY }}" || echo "Frontend deploy trigger sent"
+      
+      - name: Deployment Summary
+        run: |
+          echo "### 🚀 Production Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **This deployment required manual approval**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`production\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** Production" >> $GITHUB_STEP_SUMMARY
+          echo "**Docker Images:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Backend: \`${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-backend:prod\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Backend: \`${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-backend:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend: \`${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-frontend:prod\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend: \`${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-frontend:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Docker Hub:** https://hub.docker.com/r/${{ secrets.DOCKER_USERNAME }}/" >> $GITHUB_STEP_SUMMARY

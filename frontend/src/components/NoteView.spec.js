@@ -2,13 +2,23 @@ import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import NoteView from './NoteView.vue'
 
-vi.mock('axios', () => ({
-  default: {
+vi.mock('axios', () => {
+  const mockAxios = {
     get: vi.fn(() => Promise.resolve({ data: { notes: [] } })),
     post: vi.fn(() => Promise.resolve({ data: { message: 'saved' } })),
-    delete: vi.fn(() => Promise.resolve({ data: { message: 'deleted' } }))
+    delete: vi.fn(() => Promise.resolve({ data: { message: 'deleted' } })),
+    interceptors: {
+      request: { use: vi.fn((fn) => fn) },
+      response: { use: vi.fn((fn) => fn) }
+    }
   }
-}))
+  return {
+    default: {
+      ...mockAxios,
+      create: vi.fn(() => mockAxios)
+    }
+  }
+})
 
 describe('NoteView Component', () => {
   it('renders create note title for new note', () => {

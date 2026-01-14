@@ -31,7 +31,18 @@
     </div>
 
     <!-- Floating Action Button -->
-    <router-link to="/note" class="fab">+</router-link>
+    <router-link
+      to="/note"
+      id="add_note"
+      style="position: fixed; bottom: 30px; right: 30px; 
+             width: 60px; height: 60px; border-radius: 50%; 
+             background-color: #0d6efd; color: white; 
+             font-size: 36px; text-align: center; line-height: 60px;
+             box-shadow: 0px 4px 6px rgba(0,0,0,0.3); z-index: 1000; 
+             text-decoration: none;"
+    >
+      +
+    </router-link>
   </div>
 </template>
 

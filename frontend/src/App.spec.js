@@ -3,12 +3,22 @@ import { mount } from '@vue/test-utils'
 import App from './App.vue'
 
 // Mock axios - must be before vi.mock
-vi.mock('axios', () => ({
-  default: {
+vi.mock('axios', () => {
+  const mockAxios = {
     get: vi.fn(() => Promise.resolve({ data: { username: null } })),
-    post: vi.fn(() => Promise.resolve({ data: { message: 'ok' } }))
+    post: vi.fn(() => Promise.resolve({ data: { message: 'ok' } })),
+    interceptors: {
+      request: { use: vi.fn((fn) => fn) },
+      response: { use: vi.fn((fn) => fn) }
+    }
   }
-}))
+  return {
+    default: {
+      ...mockAxios,
+      create: vi.fn(() => mockAxios)
+    }
+  }
+})
 
 describe('App Component', () => {
   it('renders app div', async () => {
