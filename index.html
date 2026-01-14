@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerable Notes - Projekt</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 50px;
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #764ba2;
+            font-size: 1.8em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .team {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .team h3 {
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+        
+        .team ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .team li {
+            padding: 8px 0;
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        .team li:before {
+            content: "👤 ";
+            margin-right: 10px;
+        }
+        
+        .description {
+            line-height: 1.8;
+            color: #555;
+            font-size: 1.1em;
+            margin: 20px 0;
+        }
+        
+        .features {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .features li {
+            padding: 10px 0;
+            color: #333;
+        }
+        
+        .features li:before {
+            content: "🔹 ";
+            margin-right: 10px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            color: #999;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗒️ Vulnerable Notes</h1>
+        
+        <div class="team">
+            <h3>Člani ekipe</h3>
+            <ul>
+                <li>Član 1 - Developer</li>
+                <li>Član 2 - DevOps Engineer</li>
+                <li>Član 3 - Security Researcher</li>
+            </ul>
+        </div>
+        
+        <h2>O projektu</h2>
+        <div class="description">
+            <p>
+                <strong>Vulnerable Notes</strong> je poučna spletna aplikacija, zasnovana za 
+                demonstracijo varnostnih ranljivosti v modernih spletnih aplikacijah. Projekt 
+                služi kot učna platforma za razumevanje različnih varnostnih groženj in pravilnih 
+                praks pri razvoju varnih aplikacij.
+            </p>
+        </div>
+        
+        <h2>Tehnologije</h2>
+        <div style="text-align: center; margin: 20px 0;">
+            <span class="badge">Python/Flask</span>
+            <span class="badge">Vue.js</span>
+            <span class="badge">Docker</span>
+            <span class="badge">GitHub Actions</span>
+            <span class="badge">PostgreSQL</span>
+        </div>
+        
+        <h2>Lastnosti</h2>
+        <div class="features">
+            <ul>
+                <li>Uporabniška registracija in avtentikacija</li>
+                <li>Ustvarjanje in upravljanje osebnih zapiskov</li>
+                <li>RESTful API arhitektura</li>
+                <li>Containerizirana aplikacija z Docker</li>
+                <li>Avtomatsko testiranje z GitHub Actions</li>
+                <li>CI/CD pipeline z deployment na različna okolja</li>
+                <li>Demonstracija XSS in drugih varnostnih ranljivosti</li>
+            </ul>
+        </div>
+        
+        <h2>Cilji projekta</h2>
+        <div class="description">
+            <p>
+                Glavni cilj projekta je ponuditi praktično okolje za učenje o:
+            </p>
+            <ul style="list-style-position: inside; margin-top: 10px;">
+                <li>Varnostnih ranljivostih v spletnih aplikacijah</li>
+                <li>Pravilni implementaciji avtentikacije in avtorizacije</li>
+                <li>Sodobnih DevOps praksah (CI/CD, containerizacija)</li>
+                <li>Testiranju in zagotavljanju kakovosti kode</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Vulnerable Notes | Edukativni projekt</p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/TheRealH0u/vulnerable_notes" 
+                   style="color: #667eea; text-decoration: none;">
+                    📂 GitHub Repository
+                </a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
