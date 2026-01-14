@@ -165,40 +165,37 @@ jobs:
         run: |
           echo "🔍 Checking SonarCloud Quality Gate status..."
           
+          # Install jq for JSON parsing
+          sudo apt-get update -qq
+          sudo apt-get install -y jq
+          
           # Get quality gate status from SonarCloud API
           RESPONSE=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
             "https://sonarcloud.io/api/qualitygates/project_status?projectKey=TheRealH0u_vulnerable_notes")
           
           echo "Response: $RESPONSE"
           
-          STATUS=$(echo $RESPONSE | grep -o '"status":"[^"]*' | grep -o '[^"]*$')
+          # Extract the main project status (not individual conditions)
+          STATUS=$(echo $RESPONSE | jq -r '.projectStatus.status')
           
           echo "Quality Gate Status: $STATUS"
           
           if [ "$STATUS" == "OK" ] || [ "$STATUS" == "NONE" ]; then
             echo "✅ Quality Gate PASSED"
-            exit 0
-          else
-            echo "❌ Quality Gate FAILED"
-            echo "View details at: https://sonarcloud.io/dashboard?id=TheRealH0u_vulnerable_notes"
-            exit 1
-          fi
-      
-      - name: Quality Gate Status
-        if: always()
-        run: |
-          if [ "${{ job.status }}" == "success" ]; then
             echo "### ✅ Quality Gate PASSED" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "All quality gate conditions are met!" >> $GITHUB_STEP_SUMMARY
             echo "Code is ready for deployment." >> $GITHUB_STEP_SUMMARY
+            exit 0
           else
+            echo "❌ Quality Gate FAILED"
             echo "### ❌ Quality Gate FAILED" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Quality gate conditions are not met." >> $GITHUB_STEP_SUMMARY
             echo "Please fix the issues before deploying to production." >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "🔍 View details: https://sonarcloud.io/dashboard?id=TheRealH0u_vulnerable_notes" >> $GITHUB_STEP_SUMMARY
+            exit 1
           fi
 
   # ===== ANALYSIS SUMMARY =====
