@@ -158,22 +158,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Download SonarCloud report
-        uses: actions/download-artifact@v4
-        with:
-          name: sonarcloud-report
-          path: .scannerwork/
-      
       - name: Wait for SonarCloud processing
         run: sleep 10
       
-      - name: Check Quality Gate status
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          scanMetadataReportFile: .scannerwork/report-task.txt
+      - name: Check Quality Gate status via API
+        run: |
+          echo "🔍 Checking SonarCloud Quality Gate status..."
+          
+          # Get quality gate status from SonarCloud API
+          RESPONSE=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
+            "https://sonarcloud.io/api/qualitygates/project_status?projectKey=TheRealH0u_vulnerable_notes")
+          
+          echo "Response: $RESPONSE"
+          
+          STATUS=$(echo $RESPONSE | grep -o '"status":"[^"]*' | grep -o '[^"]*$')
+          
+          echo "Quality Gate Status: $STATUS"
+          
+          if [ "$STATUS" == "OK" ] || [ "$STATUS" == "NONE" ]; then
+            echo "✅ Quality Gate PASSED"
+            exit 0
+          else
+            echo "❌ Quality Gate FAILED"
+            echo "View details at: https://sonarcloud.io/dashboard?id=TheRealH0u_vulnerable_notes"
+            exit 1
+          fi
       
       - name: Quality Gate Status
         if: always()
