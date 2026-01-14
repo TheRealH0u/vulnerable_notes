@@ -12,10 +12,54 @@ env:
   FRONTEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/vulnerable-notes-frontend
 
 jobs:
+  # ===== SONARCLOUD QUALITY GATE CHECK =====
+  quality-gate-check:
+    name: Verify Quality Gate
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check SonarCloud Quality Gate
+        run: |
+          echo "🔍 Checking SonarCloud Quality Gate status..."
+          
+          # Get the latest quality gate status from SonarCloud API
+          RESPONSE=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
+            "https://sonarcloud.io/api/qualitygates/project_status?projectKey=TheRealH0u_vulnerable_notes")
+          
+          STATUS=$(echo $RESPONSE | jq -r '.projectStatus.status')
+          
+          echo "Quality Gate Status: $STATUS"
+          
+          if [ "$STATUS" == "OK" ] || [ "$STATUS" == "NONE" ]; then
+            echo "✅ Quality Gate PASSED - proceeding with deployment"
+            echo "### ✅ Quality Gate Check Passed" >> $GITHUB_STEP_SUMMARY
+            echo "Code quality meets production standards." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          else
+            echo "❌ Quality Gate FAILED - blocking deployment"
+            echo "### ❌ Quality Gate Check Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Code does not meet quality standards. Fix issues before deploying." >> $GITHUB_STEP_SUMMARY
+            echo "🔍 View details: https://sonarcloud.io/dashboard?id=TheRealH0u_vulnerable_notes" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+      
+      - name: Install jq (if needed)
+        if: failure()
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
   # ===== BACKEND BUILD =====
   backend-build:
     name: Backend Build
     runs-on: ubuntu-latest
+    needs: quality-gate-check
+    if: success()
     
     steps:
       - name: Checkout code
@@ -67,6 +111,8 @@ jobs:
   frontend-build:
     name: Frontend Build
     runs-on: ubuntu-22.04
+    needs: quality-gate-check
+    if: success()
     
     steps:
       - name: Checkout code
